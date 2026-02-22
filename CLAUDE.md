@@ -18,20 +18,19 @@
 ## 개요
 
 Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform 프로젝트입니다.
-VPC와 IAM은 유지하고, **server 워크스페이스만 생성/제거**하여 비용을 관리합니다.
 
 ## 디렉토리 구조
 
 ```
-for-onpremise/
-├── _modules/           # 공통 모듈
+├── _modules/              # 공통 모듈
 │   ├── tfc_remote_state/
-│   ├── vpc/
-│   ├── subnets/
 │   └── nat/
-├── vpc/                # VPC 워크스페이스 (유지)
-├── iam/                # IAM 워크스페이스 (유지)
-└── server/             # Server 워크스페이스 (생성/제거 대상)
+├── vpc/                   # VPC 워크스페이스
+│   └── _modules/          # VPC 전용 모듈
+│       ├── vpc/
+│       └── subnets/
+├── iam/                   # IAM 워크스페이스
+└── vpn/                   # VPN 워크스페이스
 ```
 
 ## 워크스페이스
@@ -40,37 +39,7 @@ for-onpremise/
 |-------------|-----------------|------|------|
 | vpc | onpremise-vpc | VPC, Subnets, Route Tables | 항상 유지 |
 | iam | onpremise-iam | IAM User, Access Key | 항상 유지 |
-| server | onpremise-server | NAT, EC2, NLB, Route53 | 필요시 생성/제거 |
-
-## 주요 명령어
-
-### Server 리소스 생성
-```bash
-cd for-onpremise/server
-terraform apply --auto-approve
-```
-
-### Server 리소스 제거
-```bash
-cd for-onpremise/server
-terraform destroy --auto-approve
-```
-
-## EC2 인스턴스 구성
-
-| 인스턴스명 | 역할 | 타입 | Private IP |
-|-----------|------|------|------------|
-| ansible-server | Ansible 관리 서버 | t4g.small | 동적 (public subnet) |
-| k8s-master-0 | K8s Control Plane | t4g.large | 10.0.25.101 |
-| k8s-master-1 | K8s Control Plane | t4g.large | 10.0.25.102 |
-| k8s-master-2 | K8s Control Plane | t4g.large | 10.0.25.103 |
-| k8s-worker-0 | K8s Worker Node | t4g.large | 10.0.25.104 |
-| k8s-worker-1 | K8s Worker Node | t4g.large | 10.0.25.105 |
-| k8s-worker-2 | K8s Worker Node | t4g.large | 10.0.25.106 |
-
-- Worker 노드: 100GB gp3 EBS 추가
-- AMI: Ubuntu 24.04 LTS (ARM64)
-- Region: ap-south-1
+| vpn | - | VPN | 구성 중 |
 
 ## 네트워크
 
@@ -84,11 +53,6 @@ terraform destroy --auto-approve
 - env: onpremise
 - region: ap-south-1
 
-## 도메인
-
-- ansible.jyo-liar.com - Ansible 서버
-- k8s.jyo-liar.com - K8s API (NLB)
-
 ## 인프라 상태 확인
 
 인프라 현황 확인 시 **Terraform 명령어**를 사용합니다. AWS CLI는 사용하지 않습니다.
@@ -99,14 +63,6 @@ terraform destroy --auto-approve
 | 상세 정보 | `terraform show` |
 | 출력값 확인 | `terraform output` |
 
-```bash
-cd for-onpremise/server
-terraform state list
-terraform output
-```
-
 ## 주의사항
 
-1. **vpc 워크스페이스는 destroy 하지 마세요** - server가 의존합니다
-2. server 생성 전 vpc가 apply 되어 있어야 합니다
-3. AWS provider 버전은 `_modules/nat/version.tf`와 `server/providers.tf`가 동일해야 합니다 (현재 6.27.0)
+1. **vpc 워크스페이스는 destroy 하지 마세요** - 다른 워크스페이스가 의존합니다
