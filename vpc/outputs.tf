@@ -31,12 +31,12 @@ output "core_private_subnet_ids" {
 }
 
 # EKS Subnets Outputs
-output "eks_public_subnet_ids" {
-  description = "A list of all eks public subnets"
-  value       = module.eks_subnets.public_subnet_ids
-}
+# output "eks_public_subnet_ids" {
+#   description = "A list of all eks public subnets"
+#   value       = module.eks_subnets.public_subnet_ids
+# }
 
-output "eks_private_subnet_ids" {
-  description = "A list of all eks private subnets"
-  value       = module.eks_subnets.private_subnet_ids
-}
+# output "eks_private_subnet_ids" {
+#   description = "A list of all eks private subnets"
+#   value       = module.eks_subnets.private_subnet_ids
+# }

@@ -8,7 +8,7 @@ output "tailscale_router_private_ip" {
   value       = aws_instance.tailscale_router.private_ip
 }
 
-output "test_instance_private_ip" {
-  description = "Private IP of the VPN test instance"
-  value       = aws_instance.vpn_test.private_ip
+output "worker_private_ips" {
+  description = "Private IP of the K8s workers"
+  value       = [for instance in aws_instance.k8s_workers : instance.private_ip]
 }

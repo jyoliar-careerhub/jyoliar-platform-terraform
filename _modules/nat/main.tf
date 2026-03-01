@@ -1,3 +1,18 @@
+data "aws_ami" "amazon_linux_arm64" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-arm64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
+}
+
 data "aws_subnet" "public" {
   id = var.public_subnet_id
 }
@@ -27,7 +42,7 @@ resource "aws_security_group" "nat_instance_sg" {
 }
 
 resource "aws_instance" "nat" {
-  ami = "ami-00c2fe3c2e5f11a2b" //Amazon Linux 2023 AMI arm64
+  ami = data.aws_ami.amazon_linux_arm64.id
 
   instance_type = "t4g.micro"
   subnet_id     = var.public_subnet_id
