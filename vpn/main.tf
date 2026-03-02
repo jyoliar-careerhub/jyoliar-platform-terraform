@@ -118,6 +118,14 @@ locals {
 
 # Tailscale Subnet Router
 
+# Homelab → AWS Worker 통신을 위한 VPC Route
+# kubelet → API Server, Pod-to-Pod VXLAN 등 워커가 homelab에 먼저 접근하는 트래픽용
+resource "aws_route" "homelab_via_tailscale" {
+  for_each               = toset(var.other_site_cidr_blocks)
+  route_table_id         = local.vpc_outputs["private_route_table_id"]
+  destination_cidr_block = each.value
+  network_interface_id   = aws_instance.tailscale_router.primary_network_interface_id
+}
 
 resource "aws_eip" "tailscale_router" {
   instance = aws_instance.tailscale_router.id
