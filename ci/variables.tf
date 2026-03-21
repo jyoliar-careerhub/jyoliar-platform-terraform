@@ -17,6 +17,11 @@ variable "services" {
   description = "List of service names for ECR repositories (should match GitHub repo names)"
   default = [
     "careerhub-api-composer",
+    "careerhub-posting-provider",
     "careerhub-posting-service",
+    "careerhub-posting-skillscanner",
+    "careerhub-review-crawler",
+    "careerhub-review-service",
+    "careerhub-userinfo-service",
   ]
 }
