@@ -21,3 +21,8 @@ variable "external_secrets_sa_name" {
   type    = string
   default = "external-secrets"
 }
+
+variable "ecr_image_puller_sa_name" {
+  type    = string
+  default = "ecr-image-puller"
+}
