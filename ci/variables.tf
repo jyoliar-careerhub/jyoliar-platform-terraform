@@ -23,5 +23,6 @@ variable "services" {
     "careerhub-review-crawler",
     "careerhub-review-service",
     "careerhub-userinfo-service",
+    "auth-service",
   ]
 }
