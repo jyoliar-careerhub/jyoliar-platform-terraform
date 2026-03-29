@@ -88,3 +88,11 @@ resource "discord_webhook" "alert" {
   channel_id = discord_text_channel.alert[each.key].id
   name       = "Alertmanager"
 }
+
+resource "aws_ssm_parameter" "slack_webhook_url" {
+  name = "/jyo-liar/k8s/baremetal/discord/slack-webhook-url"
+  type = "SecureString"
+  value = jsonencode({
+    for key, wh in discord_webhook.alert : key => wh.slack_url
+  })
+}

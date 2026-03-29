@@ -1,3 +1,11 @@
+variable "env" {
+  type = string
+}
+
+variable "region" {
+  type = string
+}
+
 variable "discord_bot_token" {
   type      = string
   sensitive = true
