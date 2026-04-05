@@ -6,3 +6,7 @@ variable "domain" {
   type    = string
   default = "jyo-liar.com"
 }
+
+variable "region" {
+  type = string
+}
