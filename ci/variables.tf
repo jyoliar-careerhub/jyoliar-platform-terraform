@@ -25,5 +25,6 @@ variable "services" {
     "careerhub-userinfo-service",
     "careerhub-front",
     "auth-service",
+    "careerhub-incident-agent",
   ]
 }
