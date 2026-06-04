@@ -96,3 +96,30 @@ resource "aws_ssm_parameter" "slack_webhook_url" {
     for key, wh in discord_webhook.alert : key => wh.slack_url
   })
 }
+
+# ──────────────────────────────────────────────
+# AI agent 전용 채널 + 웹훅
+#   - alertmanager 채널과 동일 카테고리에 두고 권한(Alert Viewer)을 sync로 재사용.
+#   - incident-agent가 Slack 호환(/slack) 엔드포인트에 단일 URL로 POST하므로
+#     Parameter Store에는 slack_url 단일 문자열을 저장한다(alertmanager의 JSON 맵과 다름).
+# ──────────────────────────────────────────────
+
+resource "discord_text_channel" "ai_agent" {
+  name                     = "ai-agent"
+  position                 = 3
+  topic                    = "AI agent messages - incident analysis 등 agent가 게시하는 메시지"
+  server_id                = data.discord_server.server.id
+  category                 = discord_category_channel.alert.id
+  sync_perms_with_category = true
+}
+
+resource "discord_webhook" "ai_agent" {
+  channel_id = discord_text_channel.ai_agent.id
+  name       = "AI Agent"
+}
+
+resource "aws_ssm_parameter" "ai_agent_webhook_url" {
+  name  = "/jyo-liar/k8s/baremetal/discord/ai-agent-webhook-url"
+  type  = "SecureString"
+  value = discord_webhook.ai_agent.slack_url
+}
