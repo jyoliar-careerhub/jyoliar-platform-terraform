@@ -12,13 +12,3 @@ output "ecr_image_puller_role_arn" {
   description = "IAM Role ARN for ECR image pulling"
   value       = aws_iam_role.ecr_image_puller.arn
 }
-
-output "cnpg_backup_role_arn" {
-  description = "IAM Role ARN for CloudNativePG barman-cloud backup"
-  value       = aws_iam_role.cnpg_backup.arn
-}
-
-output "cnpg_backup_bucket" {
-  description = "S3 bucket name for CloudNativePG backups"
-  value       = aws_s3_bucket.cnpg_backup.id
-}

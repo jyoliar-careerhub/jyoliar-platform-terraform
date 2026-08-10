@@ -30,7 +30,8 @@ Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform �
 │       ├── vpc/
 │       └── subnets/
 ├── iam/                   # IAM 워크스페이스
-└── vpn/                   # VPN 워크스페이스
+├── vpn/                   # VPN 워크스페이스
+└── backup/                # 백업 워크스페이스
 ```
 
 ## 워크스페이스
@@ -38,8 +39,11 @@ Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform �
 | 워크스페이스 | Terraform Cloud | 용도 | 상태 |
 |-------------|-----------------|------|------|
 | vpc | onpremise-vpc | VPC, Subnets, Route Tables | 항상 유지 |
-| iam | onpremise-iam | IAM User, Access Key, OIDC Provider, IRSA Role, CNPG 백업 버킷 | 항상 유지 |
+| iam | onpremise-iam | IAM User, Access Key | 항상 유지 |
 | vpn | - | VPN | 구성 중 |
+| backup | onpremise-backup | 백업 저장소(S3)와 그 접근 권한 | 항상 유지 |
+
+백업 저장소는 데이터를 담은 stateful 리소스라 destroy의 파급이 다른 워크스페이스와 다릅니다. 그래서 IAM·VPC와 state를 섞지 않고 `backup`으로 가릅니다. 접근 권한(IRSA Role)은 버킷과 수명이 같으므로 같은 워크스페이스에 두고, OIDC Provider ARN만 `onpremise-iam`의 출력에서 읽습니다(`_modules/tfc_remote_state`).
 
 ## 네트워크
 

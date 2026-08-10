@@ -26,14 +26,3 @@ variable "ecr_image_puller_sa_name" {
   type    = string
   default = "ecr-image-puller"
 }
-
-variable "cnpg_backup_sa_namespace" {
-  type    = string
-  default = "careerhub-prod"
-}
-
-variable "cnpg_backup_sa_name" {
-  type        = string
-  description = "CNPG Cluster 이름과 동일 — 오퍼레이터가 같은 이름의 SA를 만든다"
-  default     = "careerhub-postgresql"
-}
