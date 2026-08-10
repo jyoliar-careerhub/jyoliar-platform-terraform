@@ -1,10 +1,10 @@
 # CNPG(PostgreSQL) 백업 저장소 — barman-cloud가 base backup + WAL을 적재한다.
 # 물리 백업이므로 인스턴스 전체(모든 DB·롤·WAL)가 한 덩어리로 올라간다.
 resource "aws_s3_bucket" "cnpg" {
-  bucket = "homelab-cnpg-backup-${data.aws_caller_identity.current.account_id}"
+  bucket = "${local.name_prefix}-${data.aws_caller_identity.current.account_id}"
 
   tags = {
-    Name = "homelab-cnpg-backup"
+    Name = local.name_prefix
   }
 }
 

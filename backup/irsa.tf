@@ -1,9 +1,9 @@
-# CNPG 백업용 IRSA Role — careerhub-postgresql 인스턴스 파드의 SA가 위임받는다.
+# CNPG 백업용 IRSA Role — 대상 환경의 CNPG 인스턴스 파드 SA가 위임받는다.
 # 이 클러스터에는 EKS pod-identity webhook이 없으므로, 파드 쪽에서
 # AWS_ROLE_ARN·AWS_WEB_IDENTITY_TOKEN_FILE과 sts.amazonaws.com audience의
 # projected token을 직접 주입한다(external-secrets와 같은 방식).
 resource "aws_iam_role" "cnpg_backup" {
-  name = "homelab-k8s-cnpg-backup"
+  name = local.name_prefix
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -16,7 +16,7 @@ resource "aws_iam_role" "cnpg_backup" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${local.oidc_issuer_host}:sub" = "system:serviceaccount:${var.cnpg_backup_sa_namespace}:${var.cnpg_backup_sa_name}"
+            "${local.oidc_issuer_host}:sub" = "system:serviceaccount:${local.cnpg_sa_namespace}:${var.cnpg_sa_name}"
             "${local.oidc_issuer_host}:aud" = "sts.amazonaws.com"
           }
         }
@@ -26,7 +26,7 @@ resource "aws_iam_role" "cnpg_backup" {
 }
 
 resource "aws_iam_policy" "cnpg_backup" {
-  name        = "k8s-cnpg-backup-policy"
+  name        = "${local.name_prefix}-policy"
   description = "Policy for CloudNativePG barman-cloud backup to S3"
 
   policy = jsonencode({
