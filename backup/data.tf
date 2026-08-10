@@ -20,4 +20,14 @@ locals {
   # 대상 클러스터가 사는 네임스페이스도 환경 이름을 따른다
   # (careerhub-prod / careerhub-dev).
   cnpg_sa_namespace = "${var.cnpg_app_name}-${var.env}"
+
+  # CNPG는 Cluster 이름과 같은 이름의 SA를 만든다. 복구는 원본을 덮어쓰는 것이
+  # 아니라 별도 Cluster를 세우는 일이므로, 그 클러스터의 SA도 신뢰해야 한다 —
+  # 아니면 복구 훈련을 할 때마다 AWS 변경이 선행되어야 한다.
+  # 와일드카드 대신 이름을 열거한다. `<이름>*`로 열면 pooler SA까지 딸려 들어와
+  # 백업 버킷 쓰기 권한이 불필요하게 넓어진다.
+  cnpg_trusted_subs = [
+    "system:serviceaccount:${local.cnpg_sa_namespace}:${var.cnpg_sa_name}",
+    "system:serviceaccount:${local.cnpg_sa_namespace}:${var.cnpg_sa_name}-restore",
+  ]
 }

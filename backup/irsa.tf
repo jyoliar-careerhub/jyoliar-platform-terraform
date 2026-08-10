@@ -16,7 +16,7 @@ resource "aws_iam_role" "cnpg_backup" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${local.oidc_issuer_host}:sub" = "system:serviceaccount:${local.cnpg_sa_namespace}:${var.cnpg_sa_name}"
+            "${local.oidc_issuer_host}:sub" = local.cnpg_trusted_subs
             "${local.oidc_issuer_host}:aud" = "sts.amazonaws.com"
           }
         }
