@@ -38,7 +38,7 @@ Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform �
 | 워크스페이스 | Terraform Cloud | 용도 | 상태 |
 |-------------|-----------------|------|------|
 | vpc | onpremise-vpc | VPC, Subnets, Route Tables | 항상 유지 |
-| iam | onpremise-iam | IAM User, Access Key | 항상 유지 |
+| iam | onpremise-iam | IAM User, Access Key, OIDC Provider, IRSA Role, CNPG 백업 버킷 | 항상 유지 |
 | vpn | - | VPN | 구성 중 |
 
 ## 네트워크
@@ -51,7 +51,7 @@ Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform �
 
 `env`와 `region`은 Terraform Cloud 워크스페이스에서 주입됩니다.
 - env: onpremise
-- region: ap-south-1
+- region: ap-northeast-2
 
 ## 인프라 상태 확인
 
