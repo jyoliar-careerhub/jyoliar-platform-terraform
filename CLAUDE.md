@@ -30,7 +30,8 @@ Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform �
 │       ├── vpc/
 │       └── subnets/
 ├── iam/                   # IAM 워크스페이스
-└── vpn/                   # VPN 워크스페이스
+├── vpn/                   # VPN 워크스페이스
+└── backup/                # 백업 워크스페이스
 ```
 
 ## 워크스페이스
@@ -40,6 +41,9 @@ Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform �
 | vpc | onpremise-vpc | VPC, Subnets, Route Tables | 항상 유지 |
 | iam | onpremise-iam | IAM User, Access Key | 항상 유지 |
 | vpn | - | VPN | 구성 중 |
+| backup | onpremise-backup | 백업 저장소(S3)와 그 접근 권한 | 항상 유지 |
+
+백업 저장소는 데이터를 담은 stateful 리소스라 destroy의 파급이 다른 워크스페이스와 다릅니다. 그래서 IAM·VPC와 state를 섞지 않고 `backup`으로 가릅니다. 접근 권한(IRSA Role)은 버킷과 수명이 같으므로 같은 워크스페이스에 두고, OIDC Provider ARN만 `onpremise-iam`의 출력에서 읽습니다(`_modules/tfc_remote_state`).
 
 ## 네트워크
 
@@ -50,8 +54,10 @@ Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform �
 ## 변수
 
 `env`와 `region`은 Terraform Cloud 워크스페이스에서 주입됩니다.
-- env: onpremise
-- region: ap-south-1
+- env: 워크스페이스가 대상으로 삼는 환경 이름 (모의 인프라 워크스페이스는 `onpremise`, `backup`은 `prod`)
+- region: ap-northeast-2
+
+`env`는 태그용 문자열이 아니라 **이름의 재료**입니다. 환경마다 따로 서는 리소스(버킷, IAM Role 등)의 이름은 `env`에서 파생시켜, 나중에 같은 워크스페이스가 다른 환경으로 한 벌 더 서더라도 이름이 겹치지 않게 합니다. 환경 이름을 리터럴로 박아 넣지 마십시오.
 
 ## 인프라 상태 확인
 
