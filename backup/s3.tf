@@ -25,6 +25,12 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cnpg" {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
+
+    # AWS가 2026-04부터 신규 버킷에 SSE-C를 기본 차단한다. 이 값을 비워 두면
+    # provider가 "차단 없음"을 의도로 읽어 매 plan마다 차단을 푸는 변경이
+    # 딸려 나온다(hashicorp/terraform-provider-aws#47320).
+    # 실제 상태를 그대로 적어 둔다 — 차단은 유지하고 드리프트만 없앤다.
+    blocked_encryption_types = ["SSE-C"]
   }
 }
 
