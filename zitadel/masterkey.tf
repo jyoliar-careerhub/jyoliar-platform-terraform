@@ -10,6 +10,14 @@
 resource "random_password" "zitadel_masterkey" {
   length  = 32
   special = false
+
+  # terraform 경로에서 새 masterkey가 생기는 유일한 통로가 이 리소스의 교체다
+  # (length·special 수정, keepers 추가는 전부 ForceNew).
+  # 파라미터 쪽 prevent_destroy는 value의 in-place update를 막지 못하므로,
+  # 값의 불변은 여기서 지킨다.
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_ssm_parameter" "zitadel_masterkey" {
