@@ -8,7 +8,7 @@ resource "cloudflare_ruleset" "ratelimit" {
 
   rules = [{
     ref         = "careerhub_api"
-    description = "careerhub /api/ — IP 당 10초에 100회"
+    description = "careerhub /api/ — IP 당 10초에 50회"
     expression  = "(http.host eq \"careerhub.jyo-liar.com\" and starts_with(http.request.uri.path, \"/api/\"))"
     action      = "block"
     enabled     = true
@@ -16,7 +16,7 @@ resource "cloudflare_ruleset" "ratelimit" {
     ratelimit = {
       characteristics     = ["cf.colo.id", "ip.src"]
       period              = 10
-      requests_per_period = 100 # 초기값 — 운영 중 값만 바꾼다
+      requests_per_period = 50 # 초기값 — 운영 중 값만 바꾼다
       mitigation_timeout  = 10
     }
   }]
