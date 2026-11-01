@@ -36,16 +36,18 @@ PR 로 바꾸고 Terraform Cloud 워크스페이스에서 plan 을 읽은 뒤 ap
 
 - `vpc` 는 destroy 하지 않는다 — `vpn` 이 그 출력을 읽는다.
 - `backup` 은 데이터를 담은 stateful 리소스라 destroy 의 파급이 다르다. 그래서 `iam` 과 state 를 섞지 않고 따로 뗐다.
-- `iam` 은 plan 때 OIDC 발급자 URL 에 실제로 접속한다([`iam/oidc.tf`](iam/oidc.tf)). 그 호스트가 살아 있지 않으면 plan 이 실패한다.
+- `iam` 은 plan 때 OIDC 발급자 URL 에 TLS 로 접속해 인증서를 읽는다([`iam/oidc.tf`](iam/oidc.tf)). 그 호스트의 DNS 레코드와 터널은 `cloudflare` 가 만들므로 `cloudflare` 가 먼저다. 클러스터는 없어도 된다 — 레코드가 proxied 라 엣지가 TLS 를 종단한다.
 
 ## 다른 저장소와의 경계
 
-받는 것:
+다른 두 저장소에서 받는 것은 없다 — 이 저장소가 가장 먼저 선다.
 
-| 넘기는 저장소 | 무엇 | 그쪽의 자리 | 이 저장소의 자리 |
-|---|---|---|---|
-| onpremise-k8s | OIDC 발급자 URL | 인벤토리 `service_account_issuer` | `iam` 변수 `k8s_oidc_issuer_url`([`iam/variables.tf`](iam/variables.tf)) — 두 값이 같아야 IRSA 가 선다 |
-| jyoliar-k8s | OIDC 발급자 호스트의 공개 서빙(JWKS) | `gitops/base/bootstrap/oidc-provider` + `cloudflare-tunnel` | [`iam/oidc.tf`](iam/oidc.tf) 가 그 URL 의 TLS 인증서를 읽어 OIDC Provider 를 만든다 |
+합의하는 값 — 이 저장소의 변수 기본값이 먼저 정하고, 두 저장소가 같은 값을 쓴다:
+
+| 무엇 | 이 저장소의 자리 | 따르는 자리 |
+|---|---|---|
+| OIDC 발급자 URL | `k8s_oidc_issuer_url`([`iam/variables.tf`](iam/variables.tf) · [`backup/variables.tf`](backup/variables.tf)) | onpremise-k8s 인벤토리 `service_account_issuer` · jyoliar-k8s `cloudflare-tunnel` 의 ingress hostname |
+| IRSA 가 신뢰하는 ServiceAccount 좌표 | `iam` · `backup` 의 `*_sa_namespace` · `*_sa_name` · `cnpg_*` 변수 → 신뢰 정책의 `sub` 조건 | jyoliar-k8s 의 해당 ServiceAccount 이름 · 네임스페이스 |
 
 넘기는 것 — 전부 jyoliar-k8s 가 받는다:
 
