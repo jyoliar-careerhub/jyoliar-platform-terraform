@@ -1,6 +1,6 @@
 # NAT Instance
 module "nat" {
-  source = "../_modules/nat"
+  source = "../../_modules/nat"
 
   name             = "${var.env}-vpn-nat"
   public_subnet_id = local.vpc_outputs["core_public_subnet_ids"][0]
