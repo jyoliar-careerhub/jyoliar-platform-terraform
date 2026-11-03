@@ -6,6 +6,6 @@ module "tfc" {
   source = "./_modules/workspace"
 
   name           = "tfc"
-  project_id     = tfe_project.default.id
+  project_id     = module.project_default.id
   execution_mode = "local"
 }

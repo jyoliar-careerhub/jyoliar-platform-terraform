@@ -1,13 +1,14 @@
 # 실험 워크스페이스 — AWS 모의 환경. lab/ 아래에 있다.
 # 전부 VCS 연동 — 자기 디렉터리와 쓰는 공유 모듈 아래가 바뀔 때 run 이 생긴다.
-# env · region 은 variable set `common_vars` 가 주입한다. 비밀 변수(Tailscale 키)는 콘솔에 둔다.
+# env · region 은 워크스페이스 변수가 아니라 lab 프로젝트가 소유한 variable set `lab` 이 주입한다(projects.tf).
+# 비밀 변수(Tailscale 키)는 콘솔에 둔다.
 
 # lab/vpc/ — vpn 만 이 state 를 읽는다.
 module "vpc" {
   source = "./_modules/workspace"
 
   name                      = "lab-vpc"
-  project_id                = tfe_project.onpremise.id
+  project_id                = module.project_lab.id
   working_directory         = "lab/vpc"
   vcs                       = local.vcs
   remote_state_consumer_ids = [module.vpn.id]
@@ -18,7 +19,7 @@ module "vpn" {
   source = "./_modules/workspace"
 
   name                     = "lab-vpn"
-  project_id               = tfe_project.onpremise.id
+  project_id               = module.project_lab.id
   working_directory        = "lab/vpn"
   vcs                      = local.vcs
   another_trigger_patterns = ["_modules/tfc_remote_state/**/*", "_modules/nat/**/*"]
