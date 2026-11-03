@@ -2,10 +2,11 @@ locals {
   server_name = "Jyo Liar's Homelab"
   region      = "south-korea"
 
+  # position — 서버 채널 목록의 정렬 순서. Discord 에 있는 실제 값에 맞춘다 — 다르면 plan 이 채널 순서를 바꾸려 든다.
   alert_channels = {
-    info     = { name = "info", position = 0, topic = "Informational alerts" }
-    warn     = { name = "warn", position = 1, topic = "Warning alerts - issues requiring attention" }
-    critical = { name = "critical", position = 2, topic = "Critical alerts - immediate action required" }
+    info     = { name = "info", position = 1, topic = "Informational alerts" }
+    warn     = { name = "warn", position = 2, topic = "Warning alerts - issues requiring attention" }
+    critical = { name = "critical", position = 3, topic = "Critical alerts - immediate action required" }
   }
 }
 
@@ -106,7 +107,7 @@ resource "aws_ssm_parameter" "slack_webhook_url" {
 
 resource "discord_text_channel" "ai_agent" {
   name                     = "ai-agent"
-  position                 = 3
+  position                 = 4
   topic                    = "AI agent messages - incident analysis 등 agent가 게시하는 메시지"
   server_id                = data.discord_server.server.id
   category                 = discord_category_channel.alert.id
