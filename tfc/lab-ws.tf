@@ -6,7 +6,7 @@ module "vpc" {
   source = "./_modules/workspace"
 
   name                      = "onpremise-vpc"
-  project_id                = data.tfe_project.onpremise.id
+  project_id                = tfe_project.onpremise.id
   working_directory         = "vpc"
   auto_apply                = false
   remote_state_consumer_ids = [module.vpn.id]
@@ -17,7 +17,7 @@ module "vpn" {
   source = "./_modules/workspace"
 
   name                  = "onpremise-vpn"
-  project_id            = data.tfe_project.onpremise.id
+  project_id            = tfe_project.onpremise.id
   working_directory     = "vpn/"
   auto_apply            = false
   file_triggers_enabled = false

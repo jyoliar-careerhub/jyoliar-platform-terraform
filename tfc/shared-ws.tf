@@ -10,7 +10,7 @@ module "alert" {
   source = "./_modules/workspace"
 
   name                  = "onpremise-alert"
-  project_id            = data.tfe_project.onpremise.id
+  project_id            = tfe_project.onpremise.id
   auto_apply            = false
   file_triggers_enabled = false
 
@@ -24,7 +24,7 @@ module "ci" {
   source = "./_modules/workspace"
 
   name       = "careerhub-ci"
-  project_id = data.tfe_project.onpremise.id
+  project_id = tfe_project.onpremise.id
   auto_apply = false
 }
 
@@ -33,7 +33,7 @@ module "cloudflare" {
   source = "./_modules/workspace"
 
   name                  = "platform-cloudflare"
-  project_id            = data.tfe_project.onpremise.id
+  project_id            = tfe_project.onpremise.id
   auto_apply            = false
   file_triggers_enabled = false
 
@@ -47,7 +47,7 @@ module "iam" {
   source = "./_modules/workspace"
 
   name                      = "onpremise-iam"
-  project_id                = data.tfe_project.onpremise.id
+  project_id                = tfe_project.onpremise.id
   auto_apply                = false
   file_triggers_enabled     = false
   remote_state_consumer_ids = [module.backup.id]

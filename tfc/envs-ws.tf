@@ -10,7 +10,7 @@ module "backup" {
   source = "./_modules/workspace"
 
   name              = "prod-careerhub-backup"
-  project_id        = data.tfe_project.prod_careerhub.id
+  project_id        = tfe_project.prod_careerhub.id
   working_directory = "backup"
   vcs               = local.vcs
   trigger_patterns  = ["backup/**/*"]
@@ -21,7 +21,7 @@ module "oauth" {
   source = "./_modules/workspace"
 
   name                  = "careerhub-oauth"
-  project_id            = data.tfe_project.onpremise.id
+  project_id            = tfe_project.onpremise.id
   working_directory     = "oauth"
   auto_apply            = false
   file_triggers_enabled = false
@@ -38,7 +38,7 @@ module "zitadel" {
   source = "./_modules/workspace"
 
   name              = "prod-careerhub-zitadel"
-  project_id        = data.tfe_project.prod_careerhub.id
+  project_id        = tfe_project.prod_careerhub.id
   working_directory = "zitadel"
   vcs               = local.vcs
   trigger_patterns  = ["zitadel/**/*"]
