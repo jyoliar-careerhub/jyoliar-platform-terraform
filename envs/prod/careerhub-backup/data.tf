@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 # OIDC provider는 iam 워크스페이스가 소유한다 — 여기서는 ARN만 빌려 쓴다.
 module "tfc_remote_state" {
-  source = "../_modules/tfc_remote_state"
+  source = "../../../_modules/tfc_remote_state"
 
   workspaces = ["onpremise-iam"]
 }

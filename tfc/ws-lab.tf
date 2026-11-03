@@ -1,24 +1,24 @@
-# 실험 워크스페이스 — AWS 모의 환경. 앞으로 lab/ 아래로 간다.
+# 실험 워크스페이스 — AWS 모의 환경. lab/ 아래에 있다.
 # env · region 은 variable set `common_vars` 가 주입한다. 비밀 변수(Tailscale 키)는 콘솔에 둔다.
 
-# vpc/ — vpn 만 이 state 를 읽는다.
+# lab/vpc/ — vpn 만 이 state 를 읽는다.
 module "vpc" {
   source = "./_modules/workspace"
 
   name                      = "onpremise-vpc"
   project_id                = tfe_project.onpremise.id
-  working_directory         = "vpc"
+  working_directory         = "lab/vpc"
   auto_apply                = false
   remote_state_consumer_ids = [module.vpn.id]
 }
 
-# vpn/
+# lab/vpn/
 module "vpn" {
   source = "./_modules/workspace"
 
   name                  = "onpremise-vpn"
   project_id            = tfe_project.onpremise.id
-  working_directory     = "vpn/"
+  working_directory     = "lab/vpn"
   auto_apply            = false
   file_triggers_enabled = false
 

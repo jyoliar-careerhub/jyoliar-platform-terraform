@@ -1,5 +1,5 @@
 module "tfc_remote_state" {
-  source = "../_modules/tfc_remote_state"
+  source = "../../_modules/tfc_remote_state"
 
   workspaces = ["onpremise-vpc"]
 }
