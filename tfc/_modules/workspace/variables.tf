@@ -23,8 +23,8 @@ variable "vcs" {
   default = null
 }
 
-variable "trigger_patterns" {
-  description = "VCS push 중 run 을 만들 파일의 glob — VCS 연동에서만 뜻이 있다"
+variable "another_trigger_patterns" {
+  description = "기본 패턴(<working_directory>/**/*) 외에 run 을 만들 파일의 glob — 쓰는 공유 모듈 등. VCS 연동에서만 뜻이 있다"
   type        = list(string)
   default     = []
 }

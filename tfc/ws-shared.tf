@@ -13,7 +13,6 @@ module "alert" {
   project_id        = tfe_project.onpremise.id
   working_directory = "shared/alert"
   vcs               = local.vcs
-  trigger_patterns  = ["shared/alert/**/*"]
   auto_apply        = false
 
   variables = {
@@ -29,7 +28,6 @@ module "ci" {
   project_id        = tfe_project.onpremise.id
   working_directory = "shared/ci"
   vcs               = local.vcs
-  trigger_patterns  = ["shared/ci/**/*"]
   auto_apply        = false
 }
 
@@ -41,7 +39,6 @@ module "cloudflare" {
   project_id        = tfe_project.onpremise.id
   working_directory = "shared/cloudflare"
   vcs               = local.vcs
-  trigger_patterns  = ["shared/cloudflare/**/*"]
   auto_apply        = false
 
   variables = {
@@ -57,7 +54,6 @@ module "iam" {
   project_id                = tfe_project.onpremise.id
   working_directory         = "shared/iam"
   vcs                       = local.vcs
-  trigger_patterns          = ["shared/iam/**/*"]
   auto_apply                = false
   remote_state_consumer_ids = [module.backup.id]
 }

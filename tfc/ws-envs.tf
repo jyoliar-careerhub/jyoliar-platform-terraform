@@ -9,11 +9,11 @@
 module "backup" {
   source = "./_modules/workspace"
 
-  name              = "prod-careerhub-backup"
-  project_id        = tfe_project.prod_careerhub.id
-  working_directory = "envs/prod/careerhub-backup"
-  vcs               = local.vcs
-  trigger_patterns  = ["envs/prod/careerhub-backup/**/*", "_modules/tfc_remote_state/**/*"]
+  name                     = "prod-careerhub-backup"
+  project_id               = tfe_project.prod_careerhub.id
+  working_directory        = "envs/prod/careerhub-backup"
+  vcs                      = local.vcs
+  another_trigger_patterns = ["_modules/tfc_remote_state/**/*"]
 }
 
 # oauth/ — Terraform Cloud 의 GCP 동적 자격증명(Workload Identity)은 env 변수로 켠다.
@@ -41,5 +41,4 @@ module "zitadel" {
   project_id        = tfe_project.prod_careerhub.id
   working_directory = "zitadel"
   vcs               = local.vcs
-  trigger_patterns  = ["zitadel/**/*"]
 }
