@@ -4,11 +4,11 @@ data "aws_caller_identity" "current" {}
 module "tfc_remote_state" {
   source = "../../../_modules/tfc_remote_state"
 
-  workspaces = ["onpremise-iam"]
+  workspaces = ["shared-iam"]
 }
 
 locals {
-  iam_outputs           = module.tfc_remote_state.outputs["onpremise-iam"]
+  iam_outputs           = module.tfc_remote_state.outputs["shared-iam"]
   k8s_oidc_provider_arn = local.iam_outputs["k8s_oidc_provider_arn"]
   oidc_issuer_host      = replace(var.k8s_oidc_issuer_url, "https://", "")
 

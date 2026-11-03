@@ -1,9 +1,9 @@
 module "tfc_remote_state" {
   source = "../../_modules/tfc_remote_state"
 
-  workspaces = ["onpremise-vpc"]
+  workspaces = ["lab-vpc"]
 }
 
 locals {
-  vpc_outputs = module.tfc_remote_state.outputs["onpremise-vpc"]
+  vpc_outputs = module.tfc_remote_state.outputs["lab-vpc"]
 }

@@ -5,7 +5,7 @@
 module "vpc" {
   source = "./_modules/workspace"
 
-  name                      = "onpremise-vpc"
+  name                      = "lab-vpc"
   project_id                = tfe_project.onpremise.id
   working_directory         = "lab/vpc"
   auto_apply                = false
@@ -16,7 +16,7 @@ module "vpc" {
 module "vpn" {
   source = "./_modules/workspace"
 
-  name                  = "onpremise-vpn"
+  name                  = "lab-vpn"
   project_id            = tfe_project.onpremise.id
   working_directory     = "lab/vpn"
   auto_apply            = false
