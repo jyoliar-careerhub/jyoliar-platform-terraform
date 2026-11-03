@@ -69,23 +69,3 @@ module "project_prod_careerhub" {
     }
   }
 }
-
-# 맨 resource 로 선언했던 프로젝트 — 모듈로 옮긴다(주소만 바뀐다).
-moved {
-  from = tfe_project.default
-  to   = module.project_default.tfe_project.this
-}
-
-moved {
-  from = tfe_project.prod_careerhub
-  to   = module.project_prod_careerhub.tfe_project.this
-}
-
-# 옛 onpremise 프로젝트 — 관리에서만 뗀다. 콘솔에는 남는다(조직 소유 set `common_vars` 와 저장소 밖 워크스페이스가 있을 수 있다).
-removed {
-  from = tfe_project.onpremise
-
-  lifecycle {
-    destroy = false
-  }
-}
