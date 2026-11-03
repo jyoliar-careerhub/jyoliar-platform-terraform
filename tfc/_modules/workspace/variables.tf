@@ -30,9 +30,9 @@ variable "another_trigger_patterns" {
 }
 
 variable "auto_apply" {
-  description = "plan 성공 시 자동 apply. run trigger 로 만들어진 run 에도 같은 값을 쓴다"
+  description = "plan 성공 시 자동 apply. run trigger 로 만들어진 run 에도 같은 값을 쓴다. 기본은 false — 머지 뒤에도 apply 는 사람이 콘솔에서 승인한다"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "file_triggers_enabled" {

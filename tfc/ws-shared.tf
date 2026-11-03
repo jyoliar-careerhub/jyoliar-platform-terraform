@@ -13,7 +13,6 @@ module "alert" {
   project_id        = tfe_project.onpremise.id
   working_directory = "shared/alert"
   vcs               = local.vcs
-  auto_apply        = false
 
   variables = {
     discord_server_id = { value = "1156141095529500752" }
@@ -28,7 +27,6 @@ module "ci" {
   project_id        = tfe_project.onpremise.id
   working_directory = "shared/ci"
   vcs               = local.vcs
-  auto_apply        = false
 }
 
 # shared/cloudflare/
@@ -39,7 +37,6 @@ module "cloudflare" {
   project_id        = tfe_project.onpremise.id
   working_directory = "shared/cloudflare"
   vcs               = local.vcs
-  auto_apply        = false
 
   variables = {
     cloudflare_account_id = { value = "1b277f377c35fdff80c7e676cd54be7b" }
@@ -54,6 +51,5 @@ module "iam" {
   project_id                = tfe_project.onpremise.id
   working_directory         = "shared/iam"
   vcs                       = local.vcs
-  auto_apply                = false
   remote_state_consumer_ids = [module.backup.id]
 }
