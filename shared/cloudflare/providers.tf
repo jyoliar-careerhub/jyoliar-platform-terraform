@@ -18,10 +18,25 @@ terraform {
 provider "cloudflare" {}
 
 provider "aws" {
+  default_tags {
+    tags = {
+      env        = var.env
+      managed_by = "terraform"
+    }
+  }
+
   region = "us-east-1"
 }
 
 provider "aws" {
-  alias  = "ssm"
+  alias = "ssm"
+
+  default_tags {
+    tags = {
+      env        = var.env
+      managed_by = "terraform"
+    }
+  }
+
   region = var.region
 }
