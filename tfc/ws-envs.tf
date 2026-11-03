@@ -20,7 +20,7 @@ module "backup" {
 # 생성 직후엔 state 가 비어 있다 — 옛 워크스페이스에서 state 를 옮겨 채운다(다음 Task).
 # queue_all_runs = false 는 모듈이 고정한다 — 생성 직후 자동 run 으로 create plan 이 올라가지 않는다.
 # Google 클라이언트 값(id · secret · redirect url)은 GCP 콘솔에서 설정한 값을 이 워크스페이스의 콘솔 변수로 둔다.
-module "careerhub" {
+module "prod_careerhub" {
   source = "./_modules/workspace"
 
   name                     = "prod-careerhub"
