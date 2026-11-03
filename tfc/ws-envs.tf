@@ -23,7 +23,6 @@ module "oauth" {
   name                  = "careerhub-oauth"
   project_id            = tfe_project.onpremise.id
   working_directory     = "oauth"
-  auto_apply            = false
   file_triggers_enabled = false
 
   variables = {

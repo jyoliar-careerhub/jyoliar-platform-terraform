@@ -10,7 +10,6 @@ module "vpc" {
   project_id                = tfe_project.onpremise.id
   working_directory         = "lab/vpc"
   vcs                       = local.vcs
-  auto_apply                = false
   remote_state_consumer_ids = [module.vpn.id]
 }
 
@@ -23,7 +22,6 @@ module "vpn" {
   working_directory        = "lab/vpn"
   vcs                      = local.vcs
   another_trigger_patterns = ["_modules/tfc_remote_state/**/*", "_modules/nat/**/*"]
-  auto_apply               = false
 
   variables = {
     ssh_public_key         = { value = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDMX2GVbPKMl/ZORgK/LHdpd9LFKK1m5sLy+UER11RNXsu8GpDFkXfGibf4QrYCSznTtA/2+3VyEPY3zEfXJmaUbZ6Ynk9zH1c8L8IFyeChQC+eMJKgDIh/7vI6msVRCJY3uqFdtswvcoSQNrFV8QCfTOTCWIt9Mlnar484a0dW3hJoPipTCTRvU9peMB+3wHJ5LevY5LUgfc6tAVFj+g4DZs3W9Fvz6ZsbGD+Uk27ttTgqrxaPuGvTsJmC4cSrfKq9VUdaEsgAmgZrZNOOr2FAScTuqzclIB8jF47MZ3oCKxUClr93RAb/rtKXqzMGCnOQQDZg9BXp5cFS6OUGX6mmBIYIEnmkTsK7m3s29A7qr4CtPE6kWvkxC4zT/zcrAvNLXzytIbJMGkIlY0cMkyf/v75fZHmhYEEm7j7pI7YEAvL2Xmoshso17y4g8goPsewUbaC5mjcFB2I9g4+bgZVWbAAVKU+OuuHdT3pJWaeDjpfOZKTrywo2uN/FqjIDgC46aXKyubi5z/wmBtxI6qe+ChI43g15MeRTasU7Oe2XdyjNwkbNVCiw5LWqunbQq06GpFKsTo9apH2o+d2s9jGV2lKeMgzFKJ8PfPg+LUuTcJOVZ36LQVRfOAAhkX30GXlkFgRNI0GR72n5CAdd6CB5znNBzNTtltXxLyTO8rLAHw==" }
