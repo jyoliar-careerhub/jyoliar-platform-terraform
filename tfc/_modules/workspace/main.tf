@@ -21,6 +21,11 @@ resource "tfe_workspace" "this" {
   # provider 기본값(true)이 콘솔(false)과 달라 고정한다 — webhook run 을 첫 수동 run 전까지 큐에 넣지 않는다.
   queue_all_runs = false
 
+  # 제거 방지 두 겹 — 워크스페이스는 state 와 run 이력을 담는다.
+  # force_delete = false: 지울 때 safe delete API 를 쓴다 — 관리 중인 리소스가 남은 워크스페이스는 Terraform Cloud 가 거부한다.
+  #   provider 기본값과 같지만, 암묵적 기본값에 기대지 않도록 적어 둔다. module 블록째 지워질 때도 이것이 막는다.
+  force_delete = false
+
   dynamic "vcs_repo" {
     for_each = var.vcs == null ? [] : [var.vcs]
 
@@ -28,6 +33,12 @@ resource "tfe_workspace" "this" {
       identifier                 = vcs_repo.value.identifier
       github_app_installation_id = vcs_repo.value.github_app_installation_id
     }
+  }
+
+  # prevent_destroy: destroy · replace 가 든 plan 을 plan 단계에서 멈춘다. 이름 변경 같은 in-place 수정은 막지 않는다.
+  # 정말 지울 때는 이 줄을 잠시 풀거나, removed 블록(lifecycle { destroy = false })으로 관리만 끊는다.
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
