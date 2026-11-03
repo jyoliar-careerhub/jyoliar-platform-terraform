@@ -12,6 +12,7 @@ ci/                    # GitHub Actions 용 CodeBuild 러너 · ECR 저장소
 cloudflare/            # DNS zone · 터널 · 엣지 보호 · external-dns 토큰 → Parameter Store
 iam/                   # 클러스터의 OIDC 발급자를 신뢰하는 IAM OIDC Provider 와 IRSA Role
 oauth/                 # Google OAuth 클라이언트 → Parameter Store
+tfc/                   # Terraform Cloud 워크스페이스 자체의 선언 — 이름 · 경로 · VCS 연결 · 비밀 아닌 변수
 vpc/                   # AWS 쪽 실험 네트워크
 └── _modules/          # vpc 전용 모듈
 vpn/                   # AWS 쪽 실험 노드 — Tailscale 라우터 · 워커 인스턴스
@@ -22,7 +23,7 @@ zitadel/               # Zitadel masterkey → Parameter Store
 
 ## 환경
 
-- 워크스페이스는 Terraform Cloud 에 있다. 디렉터리 하나가 워크스페이스 하나다. 워크스페이스 이름과 변수는 Terraform Cloud 의 워크스페이스 설정이 답한다 — 코드에 백엔드 블록은 없다.
+- 워크스페이스는 Terraform Cloud 에 있다. 디렉터리 하나가 워크스페이스 하나다. 워크스페이스의 이름 · 경로 · VCS 연결 · 비밀 아닌 변수는 [`tfc/`](tfc) 가 선언한다 — 비밀 변수와 `env` · `region` 을 주입하는 variable set 은 Terraform Cloud 콘솔이 답한다. `tfc` 만 운영자의 `terraform login` 자격증명으로 로컬에서 돌리는 루트라 `cloud` 블록이 거기에만 있고, 다른 루트에 백엔드 블록은 없다.
 - `env` · `region` 은 워크스페이스 변수로 주입된다. `env` 는 태그가 아니라 이름의 재료다 — 환경마다 따로 서는 리소스의 이름은 `env` 에서 파생시키고, 환경 이름을 리터럴로 박지 않는다.
 - Parameter Store 파라미터가 어느 환경 · 어느 서비스의 것인지는 각 `aws_ssm_parameter` 의 `name` 이 답한다.
 
