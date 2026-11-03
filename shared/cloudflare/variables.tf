@@ -1,3 +1,7 @@
+variable "env" {
+  type = string
+}
+
 variable "cloudflare_account_id" {
   type = string
 }
