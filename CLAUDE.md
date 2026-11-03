@@ -59,6 +59,15 @@ Kubernetes on-premise 환경을 AWS에서 모의 구축하기 위한 Terraform �
 
 `env`는 태그용 문자열이 아니라 **이름의 재료**입니다. 환경마다 따로 서는 리소스(버킷, IAM Role 등)의 이름은 `env`에서 파생시켜, 나중에 같은 워크스페이스가 다른 환경으로 한 벌 더 서더라도 이름이 겹치지 않게 합니다. 환경 이름을 리터럴로 박아 넣지 마십시오.
 
+## 반영 — apply 는 사람이 승인한다
+
+워크스페이스의 `auto_apply`는 기본 `false`입니다(`tfc/_modules/workspace`의 기본값, 예외 없음).
+
+- PR을 머지하면 VCS가 run을 만들고 plan까지 자동으로 돕니다.
+- plan에 변경이 있으면 run은 확인 대기("Needs Confirmation")에서 멈춥니다. **머지 뒤에도 apply는 사람이 Terraform Cloud 콘솔에서 별도로 승인합니다**(Confirm & Apply). 변경이 없으면 run은 그대로 끝납니다.
+- 따라서 머지는 반영의 끝이 아닙니다. 머지 후 각 워크스페이스의 run plan을 읽고, 승인 또는 폐기(Discard)까지가 한 번의 반영입니다.
+- 확인 대기 run이 남아 있으면 그 워크스페이스의 다음 run은 그 뒤에 줄을 섭니다 — 승인하거나 폐기해 비웁니다.
+
 ## 인프라 상태 확인
 
 인프라 현황 확인 시 **Terraform 명령어**를 사용합니다. AWS CLI는 사용하지 않습니다.
