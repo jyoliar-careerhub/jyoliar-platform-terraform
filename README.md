@@ -11,7 +11,6 @@ backup/                # PostgreSQL 백업 S3 버킷과 그 IRSA Role
 ci/                    # GitHub Actions 용 CodeBuild 러너 · ECR 저장소
 cloudflare/            # DNS zone · 터널 · 엣지 보호 · external-dns 토큰 → Parameter Store
 iam/                   # 클러스터의 OIDC 발급자를 신뢰하는 IAM OIDC Provider 와 IRSA Role
-oauth/                 # Google OAuth 클라이언트 → Parameter Store
 tfc/                   # Terraform Cloud 워크스페이스 자체의 선언 — 이름 · 경로 · VCS 연결 · 비밀 아닌 변수
 vpc/                   # AWS 쪽 실험 네트워크
 └── _modules/          # vpc 전용 모듈
@@ -54,7 +53,7 @@ PR 로 바꾸고 Terraform Cloud 워크스페이스에서 plan 을 읽은 뒤 ap
 
 | 무엇 | 이 저장소의 자리 | 그쪽의 자리 |
 |---|---|---|
-| Parameter Store 파라미터 | `oauth` · `alert` · `cloudflare` · `zitadel` 의 `aws_ssm_parameter` | `ClusterSecretStore/aws-parameter-store` 를 쓰는 ExternalSecret |
+| Parameter Store 파라미터 | `shared/admin-oauth` · `alert` · `cloudflare` · `zitadel` 의 `aws_ssm_parameter` | `ClusterSecretStore/aws-parameter-store` 를 쓰는 ExternalSecret |
 | IRSA Role | [`iam/irsa_roles.tf`](iam/irsa_roles.tf)(External Secrets · ECR pull) · [`backup/irsa.tf`](backup/irsa.tf)(PostgreSQL 백업) | ServiceAccount 의 `eks.amazonaws.com/role-arn` annotation |
 | S3 백업 버킷 | [`backup/s3.tf`](backup/s3.tf) | CloudNativePG `ObjectStore` 의 `destinationPath` |
 | ECR 저장소 | [`ci/ecr.tf`](ci/ecr.tf) | overlay kustomization 의 `images` |

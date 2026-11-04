@@ -1,5 +1,5 @@
 # 환경 워크스페이스 — prod 의 careerhub 리소스. envs/prod/ 아래로 간다 — backup 은 옮겼다.
-# zitadel · oauth 의 careerhub 인증 재료는 prod-careerhub(envs/prod/careerhub)로 옮겼다 — zitadel 워크스페이스는 지웠고, oauth 는 admin 파라미터가 남아 그대로 선언한다.
+# zitadel · oauth 의 careerhub 인증 재료는 prod-careerhub(envs/prod/careerhub)로 옮겼고, oauth 에 남았던 admin 파라미터는 shared-admin-oauth 로 재생성했다(ws-shared.tf) — 옛 두 워크스페이스는 지웠다.
 #
 # env · region 은 워크스페이스 변수가 아니라 prod-careerhub 프로젝트가 소유한 variable set `prod` 가 주입한다(projects.tf).
 # 비밀 변수(Google 클라이언트)는 콘솔에 두고 적지 않는다.
@@ -28,20 +28,4 @@ module "prod_careerhub" {
   working_directory        = "envs/prod/careerhub"
   vcs                      = local.vcs
   another_trigger_patterns = ["_modules/careerhub/auth/**/*"]
-}
-
-# oauth/ — Terraform Cloud 의 GCP 동적 자격증명(Workload Identity)은 env 변수로 켠다.
-module "oauth" {
-  source = "./_modules/workspace"
-
-  name                  = "careerhub-oauth"
-  project_id            = module.project_prod_careerhub.id
-  working_directory     = "oauth"
-  file_triggers_enabled = false
-
-  variables = {
-    TFC_GCP_PROVIDER_AUTH             = { category = "env", value = "true" }
-    TFC_GCP_WORKLOAD_PROVIDER_NAME    = { category = "env", value = "projects/812085830791/locations/global/workloadIdentityPools/terraform-cloud/providers/terraform-cloud" }
-    TFC_GCP_RUN_SERVICE_ACCOUNT_EMAIL = { category = "env", value = "terraform@careerhub-417808.iam.gserviceaccount.com" }
-  }
 }
