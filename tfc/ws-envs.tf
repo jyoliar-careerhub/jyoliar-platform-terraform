@@ -1,19 +1,8 @@
-# 환경 워크스페이스 — prod 의 careerhub 리소스. envs/prod/ 아래로 간다 — backup 은 옮겼다.
+# 환경 워크스페이스 — envs/<env>/ 아래 루트. 환경 하나 = 워크스페이스 하나.
 # zitadel · oauth 의 careerhub 인증 재료는 prod-careerhub(envs/prod/careerhub)로 옮겼고, oauth 에 남았던 admin 파라미터는 shared-admin-oauth 로 재생성했다(ws-shared.tf) — 옛 두 워크스페이스는 지웠다.
 #
 # env · region 은 워크스페이스 변수가 아니라 prod-careerhub 프로젝트가 소유한 variable set `prod` 가 주입한다(projects.tf).
 # 비밀 변수(Google 클라이언트)는 콘솔에 두고 적지 않는다.
-
-# envs/prod/careerhub-backup/ — VCS 연동. iam 의 state 에서 OIDC provider ARN 을 읽는다.
-module "backup" {
-  source = "./_modules/workspace"
-
-  name                     = "prod-careerhub-backup"
-  project_id               = module.project_prod_careerhub.id
-  working_directory        = "envs/prod/careerhub-backup"
-  vcs                      = local.vcs
-  another_trigger_patterns = ["_modules/tfc_remote_state/**/*"]
-}
 
 # envs/prod/careerhub/ — VCS 연동. zitadel · oauth 의 careerhub 인증 재료가 _modules/careerhub/auth 로 모여 여기로 온다.
 # PostgreSQL 백업 재료(_modules/cnpg-backup)도 여기서 부른다 — shared-iam 의 state 에서 OIDC provider ARN 을 읽는다.

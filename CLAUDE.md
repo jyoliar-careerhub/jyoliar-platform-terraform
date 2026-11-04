@@ -26,6 +26,7 @@
 │   └── _modules/              # project · workspace
 ├── _modules/                  # 공유 모듈
 │   ├── careerhub/auth/
+│   ├── cnpg-backup/
 │   ├── nat/
 │   └── tfc_remote_state/
 ├── shared/                    # 공유 루트 — 환경 축 없음
@@ -36,8 +37,7 @@
 │   └── iam/
 ├── envs/                      # 환경 루트 — envs/<env>/<루트>
 │   └── prod/
-│       ├── careerhub/
-│       └── careerhub-backup/
+│       └── careerhub/
 └── lab/                       # 실험 루트 — AWS 모의 환경
     ├── vpc/
     │   └── _modules/          # vpc · subnets
@@ -56,12 +56,11 @@
 | shared-ci | `shared/ci/` | shared | VCS | CodeBuild 러너 · ECR 저장소 |
 | shared-cloudflare | `shared/cloudflare/` | shared | VCS | DNS zone · 터널 · 엣지 보호 · external-dns 토큰 |
 | shared-iam | `shared/iam/` | shared | VCS | IAM OIDC Provider · IRSA Role |
-| prod-careerhub | `envs/prod/careerhub/` | prod-careerhub | VCS | Zitadel masterkey · Google OAuth 클라이언트 → Parameter Store |
-| prod-careerhub-backup | `envs/prod/careerhub-backup/` | prod-careerhub | VCS | PostgreSQL 백업 S3 버킷과 그 IRSA Role |
+| prod-careerhub | `envs/prod/careerhub/` | prod-careerhub | VCS | Zitadel masterkey · Google OAuth 클라이언트 → Parameter Store · PostgreSQL 백업 S3 버킷과 그 IRSA Role |
 | lab-vpc | `lab/vpc/` | lab | VCS | VPC, Subnets, Route Tables |
 | lab-vpn | `lab/vpn/` | lab | VCS | Tailscale 라우터 · 워커 인스턴스 |
 
-`prod-careerhub-backup`은 데이터를 담은 stateful 리소스라 destroy의 파급이 다른 워크스페이스와 다릅니다. 그래서 `shared-iam`과 state를 섞지 않습니다. 접근 권한(IRSA Role)은 버킷과 수명이 같으므로 같은 워크스페이스에 두고, OIDC Provider ARN만 `shared-iam`의 출력에서 읽습니다(`_modules/tfc_remote_state`).
+환경 하나 = 워크스페이스 하나입니다. 환경 루트(`envs/<env>/careerhub`)는 `_modules/careerhub/auth`(인증 재료)와 `_modules/cnpg-backup`(PostgreSQL 백업 S3 버킷과 그 IRSA Role) 두 모듈을 부릅니다. 백업 버킷은 데이터를 담은 stateful 리소스라 `prevent_destroy`로 보호합니다 — destroy · replace가 든 plan은 plan 단계에서 멈춥니다. 접근 권한(IRSA Role)은 버킷과 수명이 같으므로 같은 모듈에 두고, OIDC Provider ARN만 `shared-iam`의 출력에서 읽습니다(`_modules/tfc_remote_state`).
 
 ## 백엔드
 
@@ -74,7 +73,7 @@
 
 환경 루트는 공유 루트의 출력을 `_modules/tfc_remote_state`로 읽습니다. 공유 루트가 환경 루트를 읽는 일은 없습니다. 읽을 수 있는 워크스페이스는 읽히는 쪽의 `remote_state_consumer_ids`(`tfc/`)가 열거합니다.
 
-- `prod-careerhub-backup` → `shared-iam`
+- `prod-careerhub` → `shared-iam`(CNPG 백업 IRSA Role의 OIDC Provider ARN)
 - `lab-vpn` → `lab-vpc`
 
 ## 네트워크 (lab/vpc)
@@ -107,7 +106,7 @@
 
 ## 새 환경 추가
 
-절차는 `README.md`의 "새 환경 추가" 절입니다 — `envs/<env>/careerhub` 디렉터리 하나 + `tfc/`에 프로젝트(`<env>-careerhub`) · variable set(`env` · `region`) · 워크스페이스(`<env>-careerhub`) 선언 + 콘솔에 sensitive 변수. Google OAuth 클라이언트는 GCP 콘솔에서 먼저 만듭니다.
+절차는 `README.md`의 "새 환경 추가" 절입니다 — `envs/<env>/careerhub` 디렉터리 하나(모듈 호출 둘 — `careerhub/auth` · `cnpg-backup`) + `tfc/`에 프로젝트(`<env>-careerhub`) · variable set(`env` · `region`) · 워크스페이스(`<env>-careerhub`) 선언 · `shared-iam`의 `remote_state_consumer_ids`에 새 워크스페이스 추가 + 콘솔에 sensitive 변수. Google OAuth 클라이언트는 GCP 콘솔에서 먼저 만듭니다.
 
 ## 인프라 상태 확인
 
@@ -123,3 +122,4 @@
 
 1. **lab-vpc 워크스페이스는 destroy 하지 마세요** - lab-vpn이 그 출력을 읽습니다
 2. **prod-careerhub의 Zitadel masterkey는 교체 · 삭제하지 마세요** - `prevent_destroy`이고, 값이 바뀌면 Zitadel이 기동하지 못합니다
+3. **CNPG 백업 버킷은 `prevent_destroy`입니다** - 백업 데이터를 담습니다. 환경 워크스페이스에 destroy · replace가 든 plan은 plan 단계에서 멈춥니다
