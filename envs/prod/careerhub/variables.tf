@@ -24,3 +24,9 @@ variable "google_redirect_url" {
   type        = string
   description = "Google OAuth redirect URL (GCP 콘솔에서 설정한 값)"
 }
+
+variable "k8s_oidc_issuer_url" {
+  type        = string
+  description = "OIDC issuer URL for self-managed K8s cluster"
+  default     = "https://k8s-oidc.jyo-liar.com"
+}

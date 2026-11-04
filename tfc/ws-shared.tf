@@ -52,7 +52,7 @@ module "cloudflare" {
   }
 }
 
-# shared/iam/ — backup 만 이 state 를 읽는다.
+# shared/iam/ — backup · prod-careerhub 가 이 state 를 읽는다.
 module "iam" {
   source = "./_modules/workspace"
 
@@ -60,5 +60,5 @@ module "iam" {
   project_id                = module.project_shared.id
   working_directory         = "shared/iam"
   vcs                       = local.vcs
-  remote_state_consumer_ids = [module.backup.id]
+  remote_state_consumer_ids = [module.backup.id, module.prod_careerhub.id]
 }
