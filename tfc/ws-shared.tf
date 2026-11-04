@@ -2,7 +2,17 @@
 # 이름은 디렉터리 좌표다(shared/<루트> → shared-<루트>). 전부 VCS 연동 — 자기 디렉터리 아래가 바뀔 때 run 이 생긴다.
 #
 # env · region 은 워크스페이스 변수가 아니라 shared 프로젝트가 소유한 variable set `shared` 가 주입한다(projects.tf).
-# 비밀 변수(Discord 토큰 · Cloudflare API 토큰)는 콘솔에 두고 적지 않는다.
+# 비밀 변수(Discord 토큰 · Cloudflare API 토큰 · admin Google 클라이언트)는 콘솔에 두고 적지 않는다.
+
+# shared/admin-oauth/ — argocd · grafana 로그인용 Google 클라이언트. admin_google_client_id · admin_google_client_secret 은 콘솔 변수(sensitive)다.
+module "admin_oauth" {
+  source = "./_modules/workspace"
+
+  name              = "shared-admin-oauth"
+  project_id        = module.project_shared.id
+  working_directory = "shared/admin-oauth"
+  vcs               = local.vcs
+}
 
 # shared/alert/
 module "alert" {
