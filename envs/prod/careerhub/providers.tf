@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.9.0"
     }
+    tfe = {
+      source  = "hashicorp/tfe"
+      version = "0.64.0"
+    }
   }
 }
 
@@ -21,3 +25,5 @@ provider "aws" {
 
   region = var.region
 }
+
+provider "tfe" {}
