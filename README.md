@@ -19,8 +19,10 @@ shared/                       # 공유 루트 — 환경 축이 없는 리소스
 ├── cloudflare/               # DNS zone · 터널 · 엣지 보호 · external-dns 토큰 → Parameter Store
 └── iam/                      # 클러스터의 OIDC 발급자를 신뢰하는 IAM OIDC Provider 와 IRSA Role
 envs/                         # 환경 루트 — envs/<env>/<루트>
-└── prod/
-    └── careerhub/            # prod 의 careerhub 재료 — _modules/careerhub/auth · _modules/cnpg-backup 호출 둘
+├── prod/
+│   └── careerhub/            # prod 의 careerhub 재료 — _modules/careerhub/auth · _modules/cnpg-backup 호출 둘
+└── stg/
+    └── careerhub/            # stg 의 careerhub 재료 — prod 와 같은 호출 둘
 lab/                          # 실험 루트 — AWS 모의 환경
 ├── vpc/                      # 실험 네트워크
 │   └── _modules/             # vpc · subnets — lab/vpc 전용 모듈
@@ -42,6 +44,7 @@ lab/                          # 실험 루트 — AWS 모의 환경
 | `shared-cloudflare` | `shared/cloudflare/` | `shared` | VCS |
 | `shared-iam` | `shared/iam/` | `shared` | VCS |
 | `prod-careerhub` | `envs/prod/careerhub/` | `prod-careerhub` | VCS |
+| `stg-careerhub` | `envs/stg/careerhub/` | `stg-careerhub` | VCS |
 | `lab-vpc` | `lab/vpc/` | `lab` | VCS |
 | `lab-vpn` | `lab/vpn/` | `lab` | VCS |
 
@@ -57,7 +60,7 @@ lab/                          # 실험 루트 — AWS 모의 환경
 
 - **VCS 루트** — PR 을 머지하면 run 이 생기고 plan 까지 돈다. 변경이 있으면 run 은 확인 대기에서 멈추고, 사람이 Terraform Cloud 콘솔에서 plan 을 읽고 apply 를 승인(또는 폐기)한다 — `auto_apply` 는 모든 워크스페이스에서 `false` 다. 로컬에서는 그 디렉터리에서 `terraform init` · `terraform plan` 으로 speculative plan 만 본다 — 로컬 apply 는 거부된다.
 - **`tfc`** — 운영자의 `terraform login` 자격증명으로 `tfc/` 에서 `terraform plan` · `terraform apply` 한다. 조직 수준 tfe 토큰은 어느 워크스페이스에도 두지 않는다.
-- **워크스페이스 추가 · 개명 · 경로 변경**은 `tfc/` 의 PR 이다. 그때 그 루트의 `backend.tf` 도 같은 PR 에서 고친다.
+- **워크스페이스 추가 · 개명 · 경로 변경**은 `tfc/` 의 PR 이다. 개명 · 경로 변경이면 그 루트의 `backend.tf` 도 같은 PR 에서 고친다. 새 루트의 `backend.tf` 는 루트 디렉터리를 만드는 PR 에 든다 — 워크스페이스가 먼저 서고 디렉터리가 뒤따른다(「새 환경 추가」).
 
 인프라 현황은 Terraform 으로만 본다 — 루트 디렉터리에서 `terraform state list` · `terraform show` · `terraform output`. AWS CLI 는 쓰지 않는다.
 
@@ -71,6 +74,7 @@ lab/                          # 실험 루트 — AWS 모의 환경
   | `shared` | `shared` | `shared` | `ap-northeast-2` |
   | `lab` | `lab` | `lab` | `ap-northeast-2` |
   | `prod-careerhub` | `prod` | `prod` | `ap-northeast-2` |
+  | `stg-careerhub` | `stg` | `stg` | `ap-northeast-2` |
   | `Default Project` | — | — | — |
 
 - 모든 AWS 루트의 provider `default_tags` 는 `env = var.env` 와 `managed_by = "terraform"` 이다. 공유 리소스의 `env` 는 `shared`, 실험 리소스의 `env` 는 `lab` 이다.
@@ -79,7 +83,7 @@ lab/                          # 실험 루트 — AWS 모의 환경
 
 ## 공유 → 환경, 단방향
 
-환경 루트는 공유 루트의 출력을 `_modules/tfc_remote_state` 로 읽는다 — `prod-careerhub` 가 `shared-iam` 의 OIDC Provider ARN 을 읽어 CNPG 백업 IRSA Role 의 신뢰 정책에 쓴다([`envs/prod/careerhub/main.tf`](envs/prod/careerhub/main.tf)). 공유 루트가 환경 루트를 읽는 일은 없다. state 를 읽을 수 있는 워크스페이스는 읽히는 쪽의 `remote_state_consumer_ids`(`tfc/`)가 열거한다 — 조직 전체 공개는 열지 않는다.
+환경 루트는 공유 루트의 출력을 `_modules/tfc_remote_state` 로 읽는다 — 환경 워크스페이스(`prod-careerhub` · `stg-careerhub`)가 `shared-iam` 의 OIDC Provider ARN 을 읽어 CNPG 백업 IRSA Role 의 신뢰 정책에 쓴다([`envs/prod/careerhub/main.tf`](envs/prod/careerhub/main.tf)). 공유 루트가 환경 루트를 읽는 일은 없다. state 를 읽을 수 있는 워크스페이스는 읽히는 쪽의 `remote_state_consumer_ids`(`tfc/`)가 열거한다 — 조직 전체 공개는 열지 않는다.
 
 실험 루트끼리도 같은 방식이다 — `lab-vpn` 이 `lab-vpc` 의 출력을 읽는다([`lab/vpn/data.tf`](lab/vpn/data.tf)).
 
@@ -87,7 +91,7 @@ lab/                          # 실험 루트 — AWS 모의 환경
 
 `stg` 를 예로 든다. careerhub 환경 하나는 디렉터리 하나(모듈 호출 둘 — 인증 재료 · PostgreSQL 백업) · `tfc/` 선언 · 콘솔 변수다. 아래 순서대로 한다.
 
-1. **GCP 콘솔에서 Google OAuth 클라이언트를 먼저 만든다.** redirect URL 도 거기서 정한다. 클라이언트 id · secret · redirect URL 세 값은 Terraform 이 만들지 않는다 — 4 에서 콘솔 변수로 넣는다.
+1. **GCP 콘솔에서 Google OAuth 클라이언트를 먼저 만든다.** redirect URL 도 거기서 정한다. 클라이언트 id · secret · redirect URL 세 값은 Terraform 이 만들지 않는다 — 3 에서 콘솔 변수로 넣는다.
 2. **`tfc/` 에 선언하는 PR** — 머지한 뒤 `tfc/` 에서 로컬 `terraform plan` · `terraform apply`.
    - [`tfc/projects.tf`](tfc/projects.tf) — 프로젝트와 그 프로젝트가 소유하는 variable set:
      ```hcl
@@ -126,7 +130,7 @@ lab/                          # 실험 루트 — AWS 모의 환경
      remote_state_consumer_ids = [module.prod_careerhub.id, module.stg_careerhub.id]
      ```
 3. **콘솔에서 `stg-careerhub` 워크스페이스에 변수를 둔다** — `google_client_id` · `google_client_secret`(sensitive) 와 `google_redirect_url`. 1 에서 GCP 콘솔이 정한 값 그대로다.
-4. **`envs/stg/careerhub/` 디렉터리를 만드는 PR** — [`envs/prod/careerhub/`](envs/prod/careerhub) 와 같은 파일 다섯 개다. 환경 이름은 `env` 변수로만 들어오므로 `backend.tf` 의 이름 말고는 내용이 같다.
+4. **`envs/stg/careerhub/` 디렉터리를 만드는 PR** — [`envs/prod/careerhub/`](envs/prod/careerhub) 와 같은 파일 다섯 개다. 환경 이름은 `env` 변수로만 들어오므로 `backend.tf` 의 이름(과 주석의 환경 이름) 말고는 내용이 같다.
    - `main.tf` — 모듈 호출 둘과 remote state 읽기.
      - `module "auth" { source = "../../../_modules/careerhub/auth"  env = var.env  google_client_* = var.google_client_* }`
      - `module "tfc_remote_state" { source = "../../../_modules/tfc_remote_state"  workspaces = ["shared-iam"] }`
@@ -143,7 +147,7 @@ lab/                          # 실험 루트 — AWS 모의 환경
 
 - `lab-vpc` 는 destroy 하지 않는다 — `lab-vpn` 이 그 출력을 읽는다.
 - CNPG 백업 버킷(`_modules/cnpg-backup` 의 `aws_s3_bucket`)은 `prevent_destroy` 다 — 백업 데이터를 담은 stateful 리소스라, 환경 워크스페이스의 destroy · replace 가 든 plan 은 plan 단계에서 멈춘다. 버킷의 보존 정책은 barman 이 관리하고 버저닝은 없다.
-- `prod-careerhub` 의 Zitadel masterkey 는 `prevent_destroy` 다 — 값이 바뀌면 Zitadel 이 기동하지 못한다([`_modules/careerhub/auth/main.tf`](_modules/careerhub/auth/main.tf)).
+- 환경 워크스페이스(`prod-careerhub` · `stg-careerhub`)의 Zitadel masterkey 는 `prevent_destroy` 다 — 값이 바뀌면 Zitadel 이 기동하지 못한다([`_modules/careerhub/auth/main.tf`](_modules/careerhub/auth/main.tf)).
 - `shared-iam` 은 plan 때 OIDC 발급자 URL 에 TLS 로 접속해 인증서를 읽는다([`shared/iam/oidc.tf`](shared/iam/oidc.tf)). 그 호스트의 DNS 레코드와 터널은 `shared-cloudflare` 가 만들므로 `shared-cloudflare` 가 먼저다. 클러스터는 없어도 된다 — 레코드가 proxied 라 엣지가 TLS 를 종단한다.
 
 ## 다른 저장소와의 경계
@@ -154,14 +158,14 @@ lab/                          # 실험 루트 — AWS 모의 환경
 
 | 무엇 | 이 저장소의 자리 | 따르는 자리 |
 |---|---|---|
-| OIDC 발급자 URL | `k8s_oidc_issuer_url`([`shared/iam/variables.tf`](shared/iam/variables.tf) · [`envs/prod/careerhub/variables.tf`](envs/prod/careerhub/variables.tf)) | onpremise-k8s 인벤토리 `service_account_issuer` · jyoliar-k8s `cloudflare-tunnel` 의 ingress hostname |
+| OIDC 발급자 URL | `k8s_oidc_issuer_url`([`shared/iam/variables.tf`](shared/iam/variables.tf) · `envs/<env>/careerhub/variables.tf`) | onpremise-k8s 인벤토리 `service_account_issuer` · jyoliar-k8s `cloudflare-tunnel` 의 ingress hostname |
 | IRSA 가 신뢰하는 ServiceAccount 좌표 | `shared/iam` 의 `*_sa_namespace` · `*_sa_name` · `_modules/cnpg-backup` 의 `namespace` · `cluster_name` 입력(`<cluster_name>` · `<cluster_name>-restore` SA) → 신뢰 정책의 `sub` 조건 | jyoliar-k8s 의 해당 ServiceAccount 이름 · 네임스페이스 |
 
 넘기는 것 — 전부 jyoliar-k8s 가 받는다:
 
 | 무엇 | 이 저장소의 자리 | 그쪽의 자리 |
 |---|---|---|
-| Parameter Store 파라미터 | `shared/admin-oauth` · `shared/alert` · `shared/cloudflare` · `envs/prod/careerhub` 의 `aws_ssm_parameter` | `ClusterSecretStore/aws-parameter-store` 를 쓰는 ExternalSecret |
+| Parameter Store 파라미터 | `shared/admin-oauth` · `shared/alert` · `shared/cloudflare` · `envs/<env>/careerhub` 의 `aws_ssm_parameter` | `ClusterSecretStore/aws-parameter-store` 를 쓰는 ExternalSecret |
 | IRSA Role | [`shared/iam/irsa_roles.tf`](shared/iam/irsa_roles.tf)(External Secrets · ECR pull) · [`_modules/cnpg-backup/irsa.tf`](_modules/cnpg-backup/irsa.tf)(PostgreSQL 백업 — `envs/<env>/careerhub` 출력 `cnpg_backup_role_arn`) | ServiceAccount 의 `eks.amazonaws.com/role-arn` annotation |
 | S3 백업 버킷 | [`_modules/cnpg-backup/s3.tf`](_modules/cnpg-backup/s3.tf)(`envs/<env>/careerhub` 출력 `cnpg_backup_bucket`) | CloudNativePG `ObjectStore` 의 `destinationPath` |
 | ECR 저장소 | [`shared/ci/ecr.tf`](shared/ci/ecr.tf) | overlay kustomization 의 `images` |
