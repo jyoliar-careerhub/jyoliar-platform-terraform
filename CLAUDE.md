@@ -36,7 +36,9 @@
 │   ├── cloudflare/
 │   └── iam/
 ├── envs/                      # 환경 루트 — envs/<env>/<루트>
-│   └── prod/
+│   ├── prod/
+│   │   └── careerhub/
+│   └── stg/
 │       └── careerhub/
 └── lab/                       # 실험 루트 — AWS 모의 환경
     ├── vpc/
@@ -57,6 +59,7 @@
 | shared-cloudflare | `shared/cloudflare/` | shared | VCS | DNS zone · 터널 · 엣지 보호 · external-dns 토큰 |
 | shared-iam | `shared/iam/` | shared | VCS | IAM OIDC Provider · IRSA Role |
 | prod-careerhub | `envs/prod/careerhub/` | prod-careerhub | VCS | Zitadel masterkey · Google OAuth 클라이언트 → Parameter Store · PostgreSQL 백업 S3 버킷과 그 IRSA Role |
+| stg-careerhub | `envs/stg/careerhub/` | stg-careerhub | VCS | prod-careerhub 와 같은 재료의 stg 한 벌 |
 | lab-vpc | `lab/vpc/` | lab | VCS | VPC, Subnets, Route Tables |
 | lab-vpn | `lab/vpn/` | lab | VCS | Tailscale 라우터 · 워커 인스턴스 |
 
@@ -73,7 +76,7 @@
 
 환경 루트는 공유 루트의 출력을 `_modules/tfc_remote_state`로 읽습니다. 공유 루트가 환경 루트를 읽는 일은 없습니다. 읽을 수 있는 워크스페이스는 읽히는 쪽의 `remote_state_consumer_ids`(`tfc/`)가 열거합니다.
 
-- `prod-careerhub` → `shared-iam`(CNPG 백업 IRSA Role의 OIDC Provider ARN)
+- `prod-careerhub` · `stg-careerhub` → `shared-iam`(CNPG 백업 IRSA Role의 OIDC Provider ARN)
 - `lab-vpn` → `lab-vpc`
 
 ## 네트워크 (lab/vpc)
@@ -86,7 +89,7 @@
 
 - 비밀 아닌 변수는 `tfc/`의 `tfe_variable`(워크스페이스 모듈의 `variables`)입니다. sensitive 변수는 Terraform Cloud 콘솔에 둡니다 — 코드에 값을 적지 마십시오.
 - `env`와 `region`은 워크스페이스가 속한 프로젝트가 소유한 variable set이 주입합니다(`tfc/projects.tf`, `priority = true`). 워크스페이스에는 그 변수가 없습니다.
-  - env: 프로젝트 단위의 환경 이름 — `shared`(shared 프로젝트) · `lab`(lab 프로젝트) · `prod`(prod-careerhub 프로젝트)
+  - env: 프로젝트 단위의 환경 이름 — `shared`(shared 프로젝트) · `lab`(lab 프로젝트) · `prod`(prod-careerhub 프로젝트) · `stg`(stg-careerhub 프로젝트)
   - region: ap-northeast-2
 - 모든 AWS 루트의 provider `default_tags`는 `env = var.env`와 `managed_by = "terraform"`입니다.
 
@@ -102,7 +105,7 @@
 - 확인 대기 run이 남아 있으면 그 워크스페이스의 다음 run은 그 뒤에 줄을 섭니다 — 승인하거나 폐기해 비웁니다.
 - VCS 루트에서 로컬로 돌릴 수 있는 것은 `terraform init` · `terraform plan`(speculative plan)뿐입니다 — 로컬 apply는 거부됩니다.
 - `tfc`만 로컬에서 `terraform plan` · `terraform apply`합니다(운영자의 `terraform login` 자격증명).
-- 워크스페이스 추가 · 개명 · 경로 변경은 `tfc/`의 PR이고, 그 루트의 `backend.tf`도 같은 PR에서 고칩니다.
+- 워크스페이스 추가 · 개명 · 경로 변경은 `tfc/`의 PR입니다. 개명 · 경로 변경이면 그 루트의 `backend.tf`도 같은 PR에서 고칩니다. 새 루트의 `backend.tf`는 루트 디렉터리를 만드는 PR에 듭니다(README "새 환경 추가").
 
 ## 새 환경 추가
 
@@ -121,5 +124,5 @@
 ## 주의사항
 
 1. **lab-vpc 워크스페이스는 destroy 하지 마세요** - lab-vpn이 그 출력을 읽습니다
-2. **prod-careerhub의 Zitadel masterkey는 교체 · 삭제하지 마세요** - `prevent_destroy`이고, 값이 바뀌면 Zitadel이 기동하지 못합니다
+2. **환경 워크스페이스(prod-careerhub · stg-careerhub)의 Zitadel masterkey는 교체 · 삭제하지 마세요** - `prevent_destroy`이고, 값이 바뀌면 Zitadel이 기동하지 못합니다
 3. **CNPG 백업 버킷은 `prevent_destroy`입니다** - 백업 데이터를 담습니다. 환경 워크스페이스에 destroy · replace가 든 plan은 plan 단계에서 멈춥니다
