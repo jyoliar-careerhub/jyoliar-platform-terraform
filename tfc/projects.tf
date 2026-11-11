@@ -1,4 +1,4 @@
-# 프로젝트 — 워크스페이스가 속하는 묶음이자 env 값의 단위다. 디렉터리 트리(shared/ · lab/ · envs/prod/)대로 나눈다.
+# 프로젝트 — 워크스페이스가 속하는 묶음이자 env 값의 단위다. 디렉터리 트리(shared/ · lab/ · envs/<env>/)대로 나눈다.
 # 이 저장소 밖 워크스페이스도 같은 프로젝트에 살 수 있지만, 프로젝트 객체 자체(이름 · 설명)는 여기서 관리한다.
 #
 # env · region 은 워크스페이스 변수가 아니라 프로젝트가 소유한 variable set 이 주입한다.
@@ -64,6 +64,24 @@ module "project_prod_careerhub" {
       priority    = true
       variables = {
         env    = { value = "prod" }
+        region = { value = local.region }
+      }
+    }
+  }
+}
+
+# stg 의 careerhub 워크스페이스
+module "project_stg_careerhub" {
+  source = "./_modules/project"
+
+  name = "stg-careerhub"
+
+  variable_sets = {
+    stg = {
+      description = "env · region — stg-careerhub 프로젝트의 워크스페이스에 주입한다"
+      priority    = true
+      variables = {
+        env    = { value = "stg" }
         region = { value = local.region }
       }
     }

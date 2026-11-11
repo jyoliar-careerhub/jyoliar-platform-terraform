@@ -1,7 +1,7 @@
 # 환경 워크스페이스 — envs/<env>/ 아래 루트. 환경 하나 = 워크스페이스 하나.
 # zitadel · oauth 의 careerhub 인증 재료는 prod-careerhub(envs/prod/careerhub)로 옮겼고, oauth 에 남았던 admin 파라미터는 shared-admin-oauth 로 재생성했다(ws-shared.tf) — 옛 두 워크스페이스는 지웠다.
 #
-# env · region 은 워크스페이스 변수가 아니라 prod-careerhub 프로젝트가 소유한 variable set `prod` 가 주입한다(projects.tf).
+# env · region 은 워크스페이스 변수가 아니라 <env>-careerhub 프로젝트가 소유한 variable set `<env>` 가 주입한다(projects.tf).
 # 비밀 변수(Google 클라이언트)는 콘솔에 두고 적지 않는다.
 
 # envs/prod/careerhub/ — VCS 연동. zitadel · oauth 의 careerhub 인증 재료가 _modules/careerhub/auth 로 모여 여기로 온다.
@@ -16,6 +16,18 @@ module "prod_careerhub" {
   name                     = "prod-careerhub"
   project_id               = module.project_prod_careerhub.id
   working_directory        = "envs/prod/careerhub"
+  vcs                      = local.vcs
+  another_trigger_patterns = ["_modules/careerhub/auth/**/*", "_modules/cnpg-backup/**/*", "_modules/tfc_remote_state/**/*"]
+}
+
+# envs/stg/careerhub/ — prod-careerhub 와 같은 모듈 호출 둘. env 값만 stg-careerhub 프로젝트의 variable set `stg` 가 다르게 준다.
+# Google 클라이언트 값(id · secret · redirect url)은 GCP 콘솔에서 만든 stg 클라이언트의 값을 이 워크스페이스의 콘솔 변수로 둔다.
+module "stg_careerhub" {
+  source = "./_modules/workspace"
+
+  name                     = "stg-careerhub"
+  project_id               = module.project_stg_careerhub.id
+  working_directory        = "envs/stg/careerhub"
   vcs                      = local.vcs
   another_trigger_patterns = ["_modules/careerhub/auth/**/*", "_modules/cnpg-backup/**/*", "_modules/tfc_remote_state/**/*"]
 }
